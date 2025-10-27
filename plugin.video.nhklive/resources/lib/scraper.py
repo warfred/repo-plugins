@@ -19,11 +19,11 @@ class myAddon(t1mAddon):
 
   def getAddonMenu(self,url,ilist):
       ilist = self.addMenuItem('NHK Live','GS', ilist, 'Live', self.addonIcon, self.addonFanart, {}, isFolder=True)
-      b = requests.get('https://nwapi.nhk.jp/nhkworld/vodpglist/v8b/en/voice/list.json', headers=self.defaultHeaders).json()
+      b = requests.get('https://api.nhkworld.jp/nwapi/vodpglist/v8b/en/voice/list.json', headers=self.defaultHeaders).json()
       b = b['vod_programs']['programs']
       b = sorted(b.items(),key=lambda t:t[1]["sort_key"])
       for a in b:
-         url = ''.join(['https://nwapi.nhk.jp/nhkworld/vodesdlist/v8b/program/',a[0],'/en/all/all.json'])
+         url = ''.join(['https://api.nhkworld.jp/nwapi/vodesdlist/v8b/program/',a[0],'/en/all/all.json'])
          a = a[1]
          name = a['title']
          thumb  =  a['image']
@@ -71,7 +71,7 @@ class myAddon(t1mAddon):
 
   def getAddonShows(self,url,ilist):
       nhkurl = 'https://nhkworld-tv.akamaized.net/hls/live/2115640/nhkworld-tv/index.m3u8'
-      b = requests.get('https://nwapi.nhk.jp/nhkworld/epg/v7b/world/now.json', headers=self.defaultHeaders).json()
+      b = requests.get('https://api.nhkworld.jp/nwapi/epg/v7b/world/now.json', headers=self.defaultHeaders).json()
       for a in b['channel']['item']:
          thumb  =  a['thumbnail_s']
          if not thumb.startswith('http'): thumb  = ''.join([NHKBASE,a['thumbnail_s']])
@@ -95,14 +95,13 @@ class myAddon(t1mAddon):
       if not url.endswith('.m3u8'):
           datakey = re.compile('/shows/(.+?)/', re.DOTALL).search(url).group(1)
           datakey = datakey[0:4]+'-'+datakey[4:]
-          url = ''.join(['https://nwapi.nhk.jp/nhkworld/vodesdlist/v7b/episode/',datakey,'/en/all/all.json'])
+          url = ''.join(['https://api.nhkworld.jp/nwapi/vodesdlist/v7b/episode/',datakey,'/en/all/all.json'])
           a = requests.get(url, headers=self.defaultHeaders).json()
-          uid = a['data']['episodes'][0]['vod_id']
-          html = requests.get('https://movie-a.nhk.or.jp/world/player/js/movie-player.js', headers=self.defaultHeaders).text
-          token = re.compile('prod:.+?token:"(.+?)"', re.DOTALL).search(html).group(1)
-          url = ''.join(['https://api01-platform.stream.co.jp/apiservice/getMediaByParam/?token=',token,'&type=json&optional_id=',uid,'&active_flg=1'])
+          pgmid = a['data']['episodes'][0]['pgm_id']
+          pgmno = a['data']['episodes'][0]['pgm_no']
+          url = ''.join(['https://api.nhkworld.jp/showsapi/v1/en/video_episodes?ids=',pgmid,pgmno,''])
           a = requests.get(url, headers=self.defaultHeaders).json()
-          url = a['meta'][0]["movie_url"]["mb_hd"]
+          url = a['items'][0]['video']['url']
 
       liz = xbmcgui.ListItem(path = url, offscreen=True)
       liz.setProperty('inputstream','inputstream.adaptive')
