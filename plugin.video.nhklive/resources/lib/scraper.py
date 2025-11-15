@@ -70,7 +70,7 @@ class myAddon(t1mAddon):
 
 
   def getAddonShows(self,url,ilist):
-      nhkurl = 'https://nhkworld-tv.akamaized.net/hls/live/2115640/nhkworld-tv/index.m3u8'
+      nhkurl = 'https://media-tyo.hls.nhkworld.jp/hls/w/live/master.m3u8'
       b = requests.get('https://api.nhkworld.jp/nwapi/epg/v7b/world/now.json', headers=self.defaultHeaders).json()
       for a in b['channel']['item']:
          thumb  =  a['thumbnail_s']
